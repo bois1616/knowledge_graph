@@ -4,4 +4,14 @@
 .ipynb_checkpoints/
 # old_notebooks
 .idea/
+*/.idea/
+*/.venv/
 *.ipynb_checkpoints
+*.pyc
+*.pyo
+*.pyd
+*.so
+*/assets/
+*/data_output/
+*/docs/
+*.iml
