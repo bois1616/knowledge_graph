@@ -6,7 +6,7 @@ import json
 import ollama.client as client
 
 
-def extractConcepts(prompt: str, metadata={}, model="mistral-openorca:latest"):
+def extract_concepts(prompt: str, metadata={}, model="mistral-openorca:latest"):
     SYS_PROMPT = (
         "Your task is extract the key concepts (and non personal entities) mentioned in the given context. "
         "Extract only the most important and atomistic concepts, if  needed break the concepts down to the simpler concepts."
@@ -32,7 +32,8 @@ def extractConcepts(prompt: str, metadata={}, model="mistral-openorca:latest"):
     return result
 
 
-def graphPrompt(input: str, metadata={}, model="mistral-openorca:latest"):
+def graph_prompt(input: str, metadata={}, model="mistral-openorca:latest"):
+    # TODO cache the input (lru_cache)
     if model == None:
         model = "mistral-openorca:latest"
 

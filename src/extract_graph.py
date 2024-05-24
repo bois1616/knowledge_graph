@@ -6,8 +6,8 @@ import numpy as np
 import os
 from pprint import pprint
 
-from langchain.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
-from langchain.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
+from langchain_community.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pathlib import Path
 
@@ -15,10 +15,10 @@ import networkx as nx
 import seaborn as sns
 from pyvis.network import Network
 
-from helpers.df_helpers import documents2Dataframe
+from helpers.df_helpers import documents_to_dataframe
 # This function uses the helpers/prompt function to extract concepts from text
-from helpers.df_helpers import df2Graph
-from helpers.df_helpers import graph2Df
+from helpers.df_helpers import dataframe_to_graph
+from helpers.df_helpers import graph_to_dataframe
 import random
 
 # globals
@@ -74,48 +74,44 @@ def colors_to_community(communities) -> pd.DataFrame:
 if __name__ == '__main__':
 
     ## Input data directory
-    data_dir = "cureus"
-    inputdirectory = Path(f"../data_input/{data_dir}")
+    data_dir = "ssg"
+    input_directory = Path(f"../data_input/{data_dir}")
+    # input_directory: str = os.getenv('userprofile') + r'\source\docs'
     ## This is where the output csv files will be written
     out_dir = data_dir
-    outputdirectory = Path(f"../data_output/{out_dir}")
+    output_directory = Path(f"../data_output/{out_dir}")
 
     # Dir PDF Loader
-    # loader = PyPDFDirectoryLoader(inputdirectory)
     ## File Loader
-    # loader = PyPDFLoader("./data/MedicalDocuments/orf-path_health-n1.pdf")
-    loader = DirectoryLoader(inputdirectory, show_progress=True)
-    documents = loader.load()
-
+    loader = DirectoryLoader(input_directory, show_progress=True)
     splitter = RecursiveCharacterTextSplitter(
             chunk_size=1500,
             chunk_overlap=150,
             length_function=len,
             is_separator_regex=False,
     )
-
-    pages = splitter.split_documents(documents)
+    pages = loader.load_and_split(text_splitter=splitter)
     print("Number of chunks = ", len(pages))
     print(pages[3].page_content)
 
-
-    df = documents2Dataframe(pages)
+    df = documents_to_dataframe(pages)
     print(df.shape)
-    df.head()
+    print(df.head())
 
     ## To regenerate the graph with LLM, set this to True
-    regenerate = False
+    regenerate = True
 
     if regenerate:
-        concepts_list = df2Graph(df, model='zephyr:latest')
-        dfg1 = graph2Df(concepts_list)
-        if not os.path.exists(outputdirectory):
-            os.makedirs(outputdirectory)
+        # Todo Stand alle n Paare node_1, node_2 Zwischenspeichern
+        concepts_list = dataframe_to_graph(df, model='zephyr:latest')
+        dfg1 = graph_to_dataframe(concepts_list)
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
 
-        dfg1.to_csv(outputdirectory / "graph.csv", sep="|", index=False)
-        df.to_csv(outputdirectory / "chunks.csv", sep="|", index=False)
+        dfg1.to_csv(output_directory / "graph.csv", sep="|", index=False)
+        df.to_csv(output_directory / "chunks.csv", sep="|", index=False)
     else:
-        dfg1 = pd.read_csv(outputdirectory / "graph.csv", sep="|")
+        dfg1 = pd.read_csv(output_directory / "graph.csv", sep="|")
 
     dfg1.replace("", np.nan, inplace=True)
     dfg1.dropna(subset=["node_1", "node_2", 'edge'], inplace=True)

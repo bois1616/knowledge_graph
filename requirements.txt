@@ -14,4 +14,10 @@ yachalk>=0.1.5      # colored output
 pip-tools>=6.4.0    # requirements management
 requests
 yachalk
-unstructured
+unstructured[pptx]
+unstructured[docx]
+unstructured[xlsx]
+unstructured[txt]
+unstructured[pdf]
+transformers
+ollama
