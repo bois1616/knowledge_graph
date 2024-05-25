@@ -18,6 +18,7 @@ def documents_to_dataframe(documents: List[Document]) -> pd.DataFrame:
         }
         rows = rows + [row]
 
+    # TODO Doubletten eliminieren
     df = pd.DataFrame(rows)
     return df
 
