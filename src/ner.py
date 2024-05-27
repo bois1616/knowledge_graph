@@ -29,7 +29,7 @@ def row_to_named_entities(row):
 
 def dataframe_text_to_named_entities(dataframe) -> pd.DataFrame:
     # Takes a dataframe from the parsed data and returns dataframe with named entities.
-    # The input dataframe must have a text and a chunk_id column.
+    # The subject dataframe must have a text and a chunk_id column.
 
     assert 'text' in dataframe.columns, "The dataframe must have a text column."
     assert 'chunk_id' in dataframe.columns, "The dataframe must have a chunk_id column."
@@ -55,7 +55,7 @@ def dataframe_text_to_named_entities(dataframe) -> pd.DataFrame:
 
 def extract_concepts(prompt: str, model='mistral-openorca:latest'):
     SYS_PROMPT = (
-        "Your task is to extract the key entities mentioned in the users input.\n"
+        "Your task is to extract the key entities mentioned in the users subject.\n"
         "Entities may include - event, concept, person, place, object, document, organisation, artifact, misc, etc.\n"
         "Format your output as a list of json with the following structure.\n"
         "[{\n"

@@ -1,12 +1,21 @@
-import sys
+
 from yachalk import chalk
+import json
+import ollama_client as client
+import sys
+
+# client = Client()
 sys.path.append("..")
 
-import json
-import ollama._client as client
 
+def extract_concepts(prompt: str,
+                     metadata: dict = None,
+                     model: str = "mistral-openorca:latest"):
+    if metadata is None:
+        metadata = {}
+    if model is None:
+        model = "mistral-openorca:latest"
 
-def extract_concepts(prompt: str, metadata={}, model="mistral-openorca:latest"):
     SYS_PROMPT = (
         "Your task is extract the key concepts (and non personal entities) mentioned in the given context. "
         "Extract only the most important and atomistic concepts, if  needed break the concepts down to the simpler concepts."
@@ -22,7 +31,7 @@ def extract_concepts(prompt: str, metadata={}, model="mistral-openorca:latest"):
         "{ }, \n"
         "]\n"
     )
-    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt)
+    response, _ = client.generate(model=model, system=SYS_PROMPT, prompt=prompt)
     try:
         result = json.loads(response)
         result = [dict(item, **metadata) for item in result]
@@ -32,13 +41,18 @@ def extract_concepts(prompt: str, metadata={}, model="mistral-openorca:latest"):
     return result
 
 
-def graph_prompt(input: str, metadata={}, model="mistral-openorca:latest"):
-    # TODO cache the input (lru_cache)
-    if model == None:
+def graph_prompt(subject: str, metadata=None, model="mistral-openorca:latest"):
+    # TODO cache the subject (lru_cache)
+    if metadata is None:
+        metadata = {}
+    if model is None:
         model = "mistral-openorca:latest"
 
-    model_info = client.show(model_name=model)
-    print( chalk.blue(model_info))
+    if subject is None or len(subject) == 0:
+        return None
+
+    model_info = client.show(model=model)
+    print(chalk.blue(model_info))
 
     SYS_PROMPT = (
         "You are a network graph maker who extracts terms and their relations from a given context. "
@@ -63,8 +77,8 @@ def graph_prompt(input: str, metadata={}, model="mistral-openorca:latest"):
         "]"
     )
 
-    USER_PROMPT = f"context: ```{input}``` \n\n output: "
-    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=USER_PROMPT)
+    USER_PROMPT = f"context: ```{subject}``` \n\n output: "
+    response, _ = client.generate(model, system=SYS_PROMPT, prompt=USER_PROMPT)
     try:
         result = json.loads(response)
         result = [dict(item, **metadata) for item in result]
