@@ -3,7 +3,7 @@ from yachalk import chalk
 sys.path.append("..")
 
 import json
-import ollama.client as client
+import ollama._client as client
 
 
 def extract_concepts(prompt: str, metadata={}, model="mistral-openorca:latest"):
@@ -37,8 +37,8 @@ def graph_prompt(input: str, metadata={}, model="mistral-openorca:latest"):
     if model == None:
         model = "mistral-openorca:latest"
 
-    # model_info = client.show(model_name=model)
-    # print( chalk.blue(model_info))
+    model_info = client.show(model_name=model)
+    print( chalk.blue(model_info))
 
     SYS_PROMPT = (
         "You are a network graph maker who extracts terms and their relations from a given context. "

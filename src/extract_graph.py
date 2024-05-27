@@ -6,8 +6,11 @@ import numpy as np
 import os
 from pprint import pprint
 
-from langchain_community.document_loaders import PyPDFLoader, UnstructuredPDFLoader, PyPDFium2Loader
-from langchain_community.document_loaders import PyPDFDirectoryLoader, DirectoryLoader
+# from langchain_community.document_loaders import PyPDFLoader,
+# UnstructuredPDFLoader,
+# PyPDFium2Loader,
+# PyPDFDirectoryLoader
+from langchain_community.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pathlib import Path
 
@@ -74,16 +77,15 @@ def colors_to_community(communities) -> pd.DataFrame:
 if __name__ == '__main__':
 
     ## Input data directory
-    data_dir = "ssg"
-    input_directory = Path(f"../data_input/{data_dir}")
+    data_dir: str = "ssg"
+    input_directory: Path = Path(f"../data_input/{data_dir}")
     # input_directory: str = os.getenv('userprofile') + r'\source\docs'
     ## This is where the output csv files will be written
-    out_dir = data_dir
-    output_directory = Path(f"../data_output/{out_dir}")
+    out_dir: str = data_dir
+    output_directory: Path = Path(f"../data_output/{out_dir}")
 
-    # Dir PDF Loader
-    ## File Loader
-    loader = DirectoryLoader(input_directory, show_progress=True)
+    # File Loader
+    loader = DirectoryLoader(str(input_directory), show_progress=True)
     splitter = RecursiveCharacterTextSplitter(
             chunk_size=1500,
             chunk_overlap=150,
@@ -98,11 +100,15 @@ if __name__ == '__main__':
     print(df.shape)
     print(df.head())
 
+    go_on = input("Do you want to continue? (y/n)")
+    if go_on != 'y':
+        exit(0)
+
     ## To regenerate the graph with LLM, set this to True
     regenerate = True
 
     if regenerate:
-        # Todo Stand alle n Paare node_1, node_2 Zwischenspeichern
+        # Todo Stand alle n Paare node_1, node_2 zwischenspeichern
         concepts_list = dataframe_to_graph(df, model='zephyr:latest')
         dfg1 = graph_to_dataframe(concepts_list)
         if not os.path.exists(output_directory):
@@ -138,9 +144,6 @@ if __name__ == '__main__':
     # Calculate the NetworkX Graph
     nodes = pd.concat([dfg['node_1'], dfg['node_2']], axis=0).unique()
     print(f'{nodes.shape= }')
-
-    import networkx as nx
-
 
     G = nx.Graph()
 
