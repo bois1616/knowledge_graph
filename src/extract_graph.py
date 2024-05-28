@@ -77,19 +77,26 @@ def colors_to_community(communities) -> pd.DataFrame:
 if __name__ == '__main__':
 
     ## Input data directory
-    data_dir: str = "ssg"
-    input_directory: Path = Path(f"../data_input/{data_dir}")
-    # input_directory: str = os.getenv('userprofile') + r'\source\docs'
+    data_dir: str = "source"
+    input_directory: str = os.path.join(os.getenv("userprofile"),
+                                         "source",
+                                         "test",
+                                         )
+
     ## This is where the output csv files will be written
-    out_dir: str = data_dir
+    out_dir: str = "ssg"
     output_directory: Path = Path(f"../data_output/{out_dir}")
 
     # File Loader
-    loader = DirectoryLoader(str(input_directory), show_progress=True)
+    loader = DirectoryLoader(input_directory,
+                             show_progress=True,
+
+                             )
     splitter = RecursiveCharacterTextSplitter(
             chunk_size=1500,
             chunk_overlap=150,
             length_function=len,
+            separators=["\n", "\n\n", ],
             is_separator_regex=False,
     )
     pages = loader.load_and_split(text_splitter=splitter)
@@ -100,16 +107,12 @@ if __name__ == '__main__':
     print(df.shape)
     print(df.head())
 
-    go_on = input("Do you want to continue? (y/n)")
-    if go_on != 'y':
-        exit(0)
-
     ## To regenerate the graph with LLM, set this to True
     regenerate = True
 
     if regenerate:
         # Todo Stand alle n Paare node_1, node_2 zwischenspeichern
-        concepts_list = dataframe_to_graph(df, model='zephyr:latest')
+        concepts_list = dataframe_to_graph(df, model='phi3', )  # 'zephyr:latest')
         dfg1 = graph_to_dataframe(concepts_list)
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)

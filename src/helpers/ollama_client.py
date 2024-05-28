@@ -1,13 +1,40 @@
+from typing import Any, Callable
 import os
 import json
 import requests
 
 BASE_URL = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
 
-# Generate a response for a given prompt with a provided model. This is a streaming endpoint, so will be a series of responses.
-# The final response object will include statistics and additional data from the request. Use the callback function to override
-# the default handler.
-def generate(model_name, prompt, system=None, template=None, context=None, options=None, callback=None):
+
+def generate(model_name: str,
+             prompt: str,
+             system: str = None,
+             template: str = None,
+             context: str = None,
+             options: dict = None,
+             callback: Callable = None):
+    """
+    Generate a response for a given prompt with a provided model.
+    This is a streaming endpoint, so will be a series of responses.
+    The final response object will include statistics and additional data from the request.
+    Use the callback function to override the default handler.
+    :param model_name:
+    :type model_name:
+    :param prompt:
+    :type prompt:
+    :param system:
+    :type system:
+    :param template:
+    :type template:
+    :param context:
+    :type context:
+    :param options:
+    :type options:
+    :param callback:
+    :type callback:
+    :return:
+    :rtype:
+    """
     try:
         url = f"{BASE_URL}/api/generate"
         payload = {
@@ -57,8 +84,22 @@ def generate(model_name, prompt, system=None, template=None, context=None, optio
         print(f"An error occurred: {e}")
         return None, None
 
-# Create a model from a Modelfile. Use the callback function to override the default handler.
-def create(model_name, model_path, callback=None):
+
+def create(model_name: str,
+           model_path: str,
+           callback: Callable = None):
+    """
+    Create a model from a model file.
+    Use the callback function to override the default handler.
+    :param model_name:
+    :type model_name:
+    :param model_path:
+    :type model_path:
+    :param callback:
+    :type callback:
+    :return:
+    :rtype:
+    """
     try:
         url = f"{BASE_URL}/api/create"
         payload = {"name": model_name, "path": model_path}
@@ -80,9 +121,24 @@ def create(model_name, model_path, callback=None):
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
-# Pull a model from a the model registry. Cancelled pulls are resumed from where they left off, and multiple
-# calls to will share the same download progress. Use the callback function to override the default handler.
-def pull(model_name, insecure=False, callback=None):
+
+def pull(model_name: str,
+         insecure: bool = False,
+         callback: Callable = None):
+    """
+    Pull a model from the model registry.
+    Cancelled pulls are resumed from where they left off, and multiple calls to will
+    share the same download progress.
+    Use the callback function to override the default handler.
+    :param model_name:
+    :type model_name: str
+    :param insecure:
+    :type insecure: bool
+    :param callback:
+    :type callback: Callable
+    :return:
+    :rtype:
+    """
     try:
         url = f"{BASE_URL}/api/pull"
         payload = {
@@ -117,8 +173,22 @@ def pull(model_name, insecure=False, callback=None):
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
-# Push a model to the model registry. Use the callback function to override the default handler.
-def push(model_name, insecure=False, callback=None):
+
+def push(model_name: str,
+         insecure: bool = False,
+         callback: Callable = None):
+    """
+    Push a model to the model registry.
+    Use the callback function to override the default handler.
+    :param model_name:
+    :type model_name: str
+    :param insecure:
+    :type insecure: bool
+    :param callback:
+    :type callback: Callable
+    :return:
+    :rtype:
+    """
     try:
         url = f"{BASE_URL}/api/push"
         payload = {
@@ -153,8 +223,13 @@ def push(model_name, insecure=False, callback=None):
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
-# List models that are available locally.
-def list():
+
+def list_models() -> list[str]:
+    """
+    List models that are available locally.
+    :return: List of models
+    :rtype: list
+    """
     try:
         response = requests.get(f"{BASE_URL}/api/tags")
         response.raise_for_status()
@@ -164,10 +239,19 @@ def list():
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        return None
+        return []
 
-# Copy a model. Creates a model with another name from an existing model.
-def copy(source, destination):
+
+def copy(source: str, destination: str) -> str:
+    """
+    Copy a model. Creates a model with another name from an existing model.
+    :param source:
+    :type source:
+    :param destination:
+    :type destination:
+    :return: result message
+    :rtype: str
+    """
     try:
         # Create the JSON payload
         payload = {
@@ -183,10 +267,17 @@ def copy(source, destination):
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        return None
+        return "Error"
 
-# Delete a model and its data.
-def delete(model_name):
+
+def delete(model_name: str) -> str:
+    """
+    Delete a model and its data.
+    :param model_name:
+    :type model_name: str
+    :return: Success Message
+    :rtype: str
+    """
     try:
         url = f"{BASE_URL}/api/delete"
         payload = {"name": model_name}
@@ -195,10 +286,17 @@ def delete(model_name):
         return "Delete successful"
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        return None
+        return "Error"
 
-# Show info about a model.
-def show(model_name):
+
+def show(model_name: str) -> Any:
+    """
+    Show info about a model.
+    :param model_name:
+    :type model_name: str
+    :return:
+    :rtype:
+    """
     try:
         url = f"{BASE_URL}/api/show"
         payload = {"name": model_name}
@@ -212,7 +310,13 @@ def show(model_name):
         print(f"An error occurred: {e}")
         return None
 
-def heartbeat():
+
+def heartbeat() -> str:
+    """
+    check for the heartbeat of the ollama server
+    :return: result message
+    :rtype: str
+    """
     try:
         url = f"{BASE_URL}/"
         response = requests.head(url)
@@ -221,4 +325,3 @@ def heartbeat():
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
         return "Ollama is not running"
-

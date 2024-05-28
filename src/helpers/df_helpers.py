@@ -18,7 +18,6 @@ def documents_to_dataframe(documents: List[Document]) -> pd.DataFrame:
         }
         rows = rows + [row]
 
-    # TODO Doubletten eliminieren
     df = pd.DataFrame(rows)
     return df
 
@@ -54,8 +53,8 @@ def concepts_to_dataframe(concepts_list) -> pd.DataFrame:
 def dataframe_to_graph(dataframe: pd.DataFrame, model=None) -> list:
     # dataframe.reset_index(inplace=True)
     results = dataframe.apply(
-        lambda row: graph_prompt(row.text, {"chunk_id": row.chunk_id}, model),
-            axis=1,     # means: row orientation
+        lambda row: graph_prompt(row.text,{"chunk_id": row.chunk_id}, model),
+          axis = 1,       # means: row orientation
     )
     # invalid json results in NaN
     results = results.dropna()
