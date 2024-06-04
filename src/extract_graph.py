@@ -77,20 +77,17 @@ def colors_to_community(communities) -> pd.DataFrame:
 if __name__ == '__main__':
 
     ## Input data directory
-    data_dir: str = "source"
-    input_directory: str = os.path.join(os.getenv("userprofile"),
-                                         "source",
-                                         "test",
-                                         )
+    top_dir: Path = Path("..")
+    input_directory: Path = top_dir / 'data_input' / 'HotG'
 
     ## This is where the output csv files will be written
-    out_dir: str = "ssg"
-    output_directory: Path = Path(f"../data_output/{out_dir}")
+    out_dir: Path = top_dir / 'data_output'
+    if not out_dir.exists():
+        out_dir.mkdir()
 
     # File Loader
     loader = DirectoryLoader(input_directory,
                              show_progress=True,
-
                              )
     splitter = RecursiveCharacterTextSplitter(
             chunk_size=1500,
@@ -114,13 +111,11 @@ if __name__ == '__main__':
         # Todo Stand alle n Paare node_1, node_2 zwischenspeichern
         concepts_list = dataframe_to_graph(df, model='phi3', )  # 'zephyr:latest')
         dfg1 = graph_to_dataframe(concepts_list)
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
 
-        dfg1.to_csv(output_directory / "graph.csv", sep="|", index=False)
-        df.to_csv(output_directory / "chunks.csv", sep="|", index=False)
+        dfg1.to_csv(out_dir / "graph.csv", sep="|", index=False)
+        df.to_csv(out_dir / "chunks.csv", sep="|", index=False)
     else:
-        dfg1 = pd.read_csv(output_directory / "graph.csv", sep="|")
+        dfg1 = pd.read_csv(out_dir / "graph.csv", sep="|")
 
     dfg1.replace("", np.nan, inplace=True)
     dfg1.dropna(subset=["node_1", "node_2", 'edge'], inplace=True)
